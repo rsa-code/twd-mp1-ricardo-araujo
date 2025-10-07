@@ -29,7 +29,7 @@ function Footer() {
               Saber mais sobre Next.js
             </a>
             <a
-              href={`https://github.com/deca-ua/mp1-template-david}`}
+              href={`https://github.com/TDW-2025/MP1`}
               className="mx-3 font-bold hover:underline"
             >
               Ver exemplo no GitHub
