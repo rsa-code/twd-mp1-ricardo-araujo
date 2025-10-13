@@ -2,7 +2,7 @@
   "private": true,
   "scripts": {
     "dev": "next",
-    "build": "dotenv -e .env.local -- next build",
+    "build": "next build",
     "start": "next start",
     "setup": "node ./lib/setup.js",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",

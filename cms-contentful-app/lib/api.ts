@@ -29,17 +29,26 @@ const POST_GRAPHQL_FIELDS = `
 `;
 
 async function fetchGraphQL(query: string, preview = false): Promise<any> {
+  const spaceId = process.env.CONTENTFUL_SPACE_ID;
+  const token = preview
+    ? process.env.CONTENTFUL_PREVIEW_ACCESS_TOKEN
+    : process.env.CONTENTFUL_ACCESS_TOKEN;
+
+  if (!spaceId || !token) {
+    console.error('Missing Contentful credentials:', {
+      spaceId: spaceId ? 'present' : 'MISSING',
+      token: token ? 'present' : 'MISSING',
+    });
+    throw new Error('Contentful credentials not configured');
+  }
+
   const response = await fetch(
-    `https://graphql.contentful.com/content/v1/spaces/${process.env.CONTENTFUL_SPACE_ID}`,
+    `https://graphql.contentful.com/content/v1/spaces/${spaceId}`,
     {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${
-          preview
-            ? process.env.CONTENTFUL_PREVIEW_ACCESS_TOKEN
-            : process.env.CONTENTFUL_ACCESS_TOKEN
-        }`,
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({ query }),
       next: { tags: ['posts'] },
