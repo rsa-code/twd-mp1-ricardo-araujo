@@ -2,14 +2,9 @@ name: Code Quality Checks
 
 on:
   push:
-    branches:
-      - main
-      - develop
-      - 'feature/**'
+    branches: [main, develop]
   pull_request:
-    branches:
-      - main
-      - develop
+    branches: [main, develop]
 
 jobs:
   code-quality:
