@@ -1,13 +1,13 @@
-import Link from "next/link";
-import { draftMode } from "next/headers";
+import { draftMode } from 'next/headers';
+import Link from 'next/link';
 
-import Date from "./date";
-import CoverImage from "./cover-image";
-import Avatar from "./avatar";
-import MoreStories from "./more-stories";
+import Avatar from './avatar';
+import CoverImage from './cover-image';
+import Date from './date';
+import MoreStories from './more-stories';
 
-import { getAllPosts } from "@/lib/api";
-import { CMS_NAME, CMS_URL } from "@/lib/constants";
+import { getAllPosts } from '@/lib/api';
+import { CMS_NAME, CMS_URL } from '@/lib/constants';
 
 function Intro() {
   return (
@@ -16,14 +16,14 @@ function Intro() {
         Blog.
       </h1>
       <h2 className="text-center md:text-left text-lg mt-5 md:pl-8">
-        A statically generated blog example using{" "}
+        A statically generated blog example using{' '}
         <a
           href="https://nextjs.org/"
           className="underline hover:text-success duration-200 transition-colors"
         >
           Next.js
-        </a>{" "}
-        and{" "}
+        </a>{' '}
+        and{' '}
         <a
           href={CMS_URL}
           className="underline hover:text-success duration-200 transition-colors"
@@ -77,7 +77,7 @@ function HeroPost({
 }
 
 export default async function Page() {
-  const { isEnabled } = draftMode();
+  const { isEnabled } = await draftMode();
   const allPosts = await getAllPosts(isEnabled);
   const heroPost = allPosts[0];
   const morePosts = allPosts.slice(1);

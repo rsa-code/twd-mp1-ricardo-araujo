@@ -1,13 +1,13 @@
-import Link from "next/link";
-import { draftMode } from "next/headers";
+import { draftMode } from 'next/headers';
+import Link from 'next/link';
 
-import MoreStories from "../../more-stories";
-import Avatar from "../../avatar";
-import Date from "../../date";
-import CoverImage from "../../cover-image";
+import Avatar from '../../avatar';
+import CoverImage from '../../cover-image';
+import Date from '../../date';
+import MoreStories from '../../more-stories';
 
-import { Markdown } from "@/lib/markdown";
-import { getAllPosts, getPostAndMorePosts } from "@/lib/api";
+import { getAllPosts, getPostAndMorePosts } from '@/lib/api';
+import { Markdown } from '@/lib/markdown';
 
 export async function generateStaticParams() {
   const allPosts = await getAllPosts(false);
@@ -22,7 +22,7 @@ export default async function PostPage({
 }: {
   params: { slug: string };
 }) {
-  const { isEnabled } = draftMode();
+  const { isEnabled } = await draftMode();
   const { post, morePosts } = await getPostAndMorePosts(params.slug, isEnabled);
 
   return (
