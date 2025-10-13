@@ -7,6 +7,7 @@ on:
 
   pull_request:
     branches:
+      - main
       - master
 
   repository_dispatch:
@@ -119,7 +120,7 @@ jobs:
     name: Deploy to Netlify
     needs: build
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master' && success()
+    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && success()
     environment:
       name: production
       url: ${{ steps.deploy.outputs.deploy-url }}
