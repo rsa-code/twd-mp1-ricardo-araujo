@@ -1,6 +1,6 @@
-import './globals.css';
-import { Inter } from 'next/font/google';
 import { CMS_NAME } from '@/lib/constants';
+import { Inter } from 'next/font/google';
+import './globals.css';
 
 export const metadata = {
   title: `Next.js and ${CMS_NAME} Example`,
