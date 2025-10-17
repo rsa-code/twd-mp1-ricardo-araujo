@@ -10,9 +10,6 @@ on:
       - main
       - master
 
-  repository_dispatch:
-    types: [contentful-update]
-
   workflow_dispatch:
 
 permissions:

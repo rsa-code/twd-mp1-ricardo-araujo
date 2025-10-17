@@ -1,0 +1,58 @@
+name: Contentful Content Update Deploy
+
+on:
+  repository_dispatch:
+    types: [contentful-update]
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Deploy Updated Content to Netlify
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: ${{ steps.deploy.outputs.deploy-url }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project with updated Contentful content
+        run: npm run build
+        env:
+          CONTENTFUL_SPACE_ID: ${{ secrets.CONTENTFUL_SPACE_ID }}
+          CONTENTFUL_ACCESS_TOKEN: ${{ secrets.CONTENTFUL_ACCESS_TOKEN }}
+          CONTENTFUL_PREVIEW_ACCESS_TOKEN: ${{ secrets.CONTENTFUL_PREVIEW_ACCESS_TOKEN }}
+          CONTENTFUL_PREVIEW_SECRET: ${{ secrets.CONTENTFUL_PREVIEW_SECRET }}
+          CONTENTFUL_REVALIDATE_SECRET: ${{ secrets.CONTENTFUL_REVALIDATE_SECRET }}
+
+      - name: Install Netlify CLI
+        run: npm install -g netlify-cli
+
+      - name: Deploy to Netlify
+        id: deploy
+        run: |
+          netlify deploy --prod --dir=.next --message="Content updated via Contentful webhook - $(date)" > deploy-output.txt
+          echo "deploy-url=$(grep -o 'https://[^ ]*' deploy-output.txt | head -1)" >> $GITHUB_OUTPUT
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+
+      - name: Notify deployment completion
+        if: success()
+        run: |
+          echo "✅ Content successfully deployed to Netlify"
+          echo "🌐 URL: ${{ steps.deploy.outputs.deploy-url }}"
