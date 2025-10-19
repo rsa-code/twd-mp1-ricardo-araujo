@@ -33,4 +33,4 @@ pre-push:
 commit-msg:
   commands:
     message-length:
-      run: powershell -NoProfile -Command "$msg = Get-Content '{1}'; if ($msg.Length -lt 10) { Write-Host 'Commit message must be at least 10 characters'; exit 1 }"
+      run: powershell -NoProfile -ExecutionPolicy Bypass -File .lefthook/commit-msg-check.ps1 {1}
