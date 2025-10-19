@@ -1,0 +1,120 @@
+stages:
+  - quality
+  - build
+  - deploy
+  - webhook-deploy
+
+variables:
+  NODE_VERSION: '20'
+  NPM_CONFIG_CACHE: '$CI_PROJECT_DIR/.npm'
+
+cache:
+  key:
+    files:
+      - package-lock.json
+  paths:
+    - node_modules/
+    - .npm/
+    - .next/cache/
+
+.node_setup:
+  image: node:${NODE_VERSION}
+  before_script:
+    - node --version
+    - npm --version
+    - npm ci --cache .npm --prefer-offline
+
+prettier-check:
+  extends: .node_setup
+  stage: quality
+  script:
+    - npx prettier --check .
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+
+eslint-check:
+  extends: .node_setup
+  stage: quality
+  script:
+    - npx eslint .
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+
+tests:
+  extends: .node_setup
+  stage: quality
+  script:
+    - npm test
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage/cobertura-coverage.xml
+    paths:
+      - coverage/
+    expire_in: 30 days
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+
+build:
+  extends: .node_setup
+  stage: build
+  needs: [prettier-check, eslint-check, tests]
+  script:
+    - npm run build
+  artifacts:
+    paths:
+      - .next/
+    expire_in: 1 day
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "master"'
+      when: on_success
+
+deploy:
+  extends: .node_setup
+  stage: deploy
+  dependencies:
+    - build
+  environment:
+    name: production
+    url: https://your-site.netlify.app
+  script:
+    - npm install -g netlify-cli
+    - |
+      netlify deploy \
+        --prod \
+        --dir=.next \
+        --message="Deploy from GitLab CI - ${CI_COMMIT_SHORT_SHA}" \
+        --auth=$NETLIFY_AUTH_TOKEN \
+        --site=$NETLIFY_SITE_ID > deploy-output.txt
+    - echo "Deployed to $(grep -o 'https://[^ ]*' deploy-output.txt | head -1)"
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "master"'
+      when: on_success
+
+contentful-webhook-deploy:
+  extends: .node_setup
+  stage: webhook-deploy
+  environment:
+    name: production
+    url: https://your-site.netlify.app
+  script:
+    - npm run build
+    - npm install -g netlify-cli
+    - |
+      netlify deploy \
+        --prod \
+        --dir=.next \
+        --message="Content updated via Contentful webhook" \
+        --auth=$NETLIFY_AUTH_TOKEN \
+        --site=$NETLIFY_SITE_ID
+    - echo "✅ Content successfully deployed to Netlify"
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "trigger" && $TRIGGER_SOURCE == "contentful"'
+      when: always
