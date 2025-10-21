@@ -25,10 +25,14 @@ const customJestConfig = {
     '!tailwind.config.ts',
   ],
   testMatch: [
-    '**/__tests__/**/*.{js,jsx,ts,tsx}',
+    '**/__tests__/**/*.test.{js,jsx,ts,tsx}',
     '**/?(*.)+(spec|test).{js,jsx,ts,tsx}',
   ],
-  testPathIgnorePatterns: ['<rootDir>/.next/', '<rootDir>/node_modules/'],
+  testPathIgnorePatterns: [
+    '<rootDir>/.next/',
+    '<rootDir>/node_modules/',
+    '<rootDir>/__tests__/.*\\.d\\.ts$',
+  ],
   transform: {
     '^.+\\.(js|jsx|ts|tsx)$': ['babel-jest', { presets: ['next/babel'] }],
   },
